@@ -1,0 +1,154 @@
+{
+  "fields": [
+    {
+      "name": "id",
+      "type": "ID",
+      "valueClass": "String",
+      "isCollection": false,
+      "description": "device id",
+      "tags": []
+    },
+    {
+      "name": "temperature1",
+      "type": "TEMPERATURE",
+      "valueClass": "Double",
+      "isCollection": false,
+      "description": "Temperature around the device",
+      "tags": [],
+      "isSensitive": false,
+      "unit": "SI.CELSIUS"
+    },
+    {
+      "name": "temperature2",
+      "type": "TEMPERATURE",
+      "valueClass": "Double",
+      "isCollection": false,
+      "description": "Temperature around the device",
+      "tags": [],
+      "isSensitive": false,
+      "unit": "SI.CELSIUS"
+    },
+    {
+      "name": "temperature3",
+      "type": "TEMPERATURE",
+      "valueClass": "Double",
+      "isCollection": false,
+      "description": "Temperature around the device",
+      "tags": [],
+      "isSensitive": false,
+      "unit": "SI.CELSIUS"
+    },
+    {
+      "name": "humidity1",
+      "type": "CUSTOM",
+      "valueClass": "Float",
+      "isCollection": false,
+      "description": "Humidity around the device",
+      "tags": [],
+      "isSensitive": false,
+      "unitSymbol": "%"
+    },
+    {
+      "name": "humidity2",
+      "type": "CUSTOM",
+      "valueClass": "Float",
+      "isCollection": false,
+      "description": "Humidity around the device",
+      "tags": [],
+      "isSensitive": false,
+      "unitSymbol": "%"
+    },
+    {
+      "name": "humidity3",
+      "type": "CUSTOM",
+      "valueClass": "Float",
+      "isCollection": false,
+      "description": "Humidity around the device",
+      "tags": [],
+      "isSensitive": false,
+      "unitSymbol": "%"
+    },
+    {
+      "name": "airQuality1",
+      "type": "CUSTOM",
+      "isCollection": false,
+      "valueClass": "Float"
+    },
+    {
+      "name": "airQuality2",
+      "type": "CUSTOM",
+      "isCollection": false,
+      "valueClass": "Float"
+    },
+    {
+      "name": "airQuality3",
+      "type": "CUSTOM",
+      "isCollection": false,
+      "valueClass": "Float"
+    },
+    {
+      "name": "uptime",
+      "type": "CUSTOM",
+      "valueClass": "Integer",
+      "isCollection": false,
+      "description": "Device uptime",
+      "tags": []
+    }
+  ],
+  "actions": [
+    {
+      "name": "setOn",
+      "description": "Set state to On",
+      "parameters": [
+        {
+          "name": "id",
+          "type": "ID",
+          "valueClass": "String"
+        }
+      ],
+      "isStandard": false,
+      "type": "CUSTOM"
+    },
+    {
+      "name": "setOff",
+      "description": "Set state to Off",
+      "parameters": [
+        {
+          "name": "id",
+          "type": "ID",
+          "valueClass": "String"
+        }
+      ],
+      "isStandard": false,
+      "type": "CUSTOM"
+    },
+    {
+      "name": "setMode",
+      "description": "set a mode",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "CUSTOM",
+          "valueClass": "String"
+        }
+      ],
+      "isStandard": false,
+      "type": "CUSTOM"
+    },
+    {
+      "name": "setValue",
+      "description": "Set a double value",
+      "parameters": [
+        {
+          "name": "double",
+          "type": "CUSTOM",
+          "valueClass": "Double",
+          "unit": null
+        }
+      ],
+      "isStandard": false,
+      "type": "CUSTOM"
+    }
+  ],
+  "messageFormat": "json"
+}
