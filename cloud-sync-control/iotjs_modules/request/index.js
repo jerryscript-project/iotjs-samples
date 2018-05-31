@@ -14,13 +14,18 @@
  */
 
 var https = require('https');
+var url = require('url');
 
 function request(options, data, callback) {
+  if(options.protocol && options.protocol != 'https:') {
+    throw new TypeError('now only for https');
+  }
+
   var req = https.request(options, function(res) {
     var responseData = '';
 
-    res.on('data', function(incomming) {
-      responseData += incomming.toString();
+    res.on('data', function(chunk) {
+      responseData += chunk.toString();
     });
 
     res.on('end', function() {
@@ -38,5 +43,49 @@ function request(options, data, callback) {
     req.end();
   }
 }
+
+request.get = function(options, data, callback) {
+  var query = {
+    method: 'GET',
+    rejectUnauthorized: false,
+    headers: {'user-agent': 'iotjs'},
+  };
+
+  if (typeof options === 'string') {
+    options = url.parse(options);
+  }
+
+  if (isObject(options)) {
+    query = mixin(query, options);
+  }
+
+  request(query, data, callback);
+}
+
+
+function isObject(arg) {
+  return typeof arg === 'object' && arg != null;
+}
+
+
+function mixin(target) {
+  if (target === null || target === undefined) {
+    throw new TypeError('target cannot be null or undefined');
+  }
+
+  for (var i = 1; i < arguments.length; ++i) {
+    var source = arguments[i];
+    if (!(target === null || target === undefined)) {
+      for (var prop in source) {
+        if (source.hasOwnProperty(prop)) {
+          target[prop] = source[prop];
+        }
+      }
+    }
+  }
+
+  return target;
+}
+
 
 module.exports = request;
