@@ -23,6 +23,8 @@ var CloudDevice = function(options) {
   this.deviceToken = options.deviceToken;
   this.hostname = options.hostname;
   this.userAgent = options.userAgent;
+
+  this.queryEndDate = Date.now();
 };
 
 function createResultHandler(callback) {
@@ -87,6 +89,46 @@ CloudDevice.prototype.getActions = function(options, callback) {
   null,
   createResultHandler(callback));
 };
+
+CloudDevice.prototype.getLastAction = function(callback) {
+  // polling one single action
+  var query = {
+    startDate: this.queryEndDate,
+    endDate: Date.now(),
+    order: 'desc',
+    count: 1,
+  };
+
+  this.getActions(query, parseActions);
+
+  var self = this;
+
+  function parseActions(error, result) {
+    var action = null;
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    var data = result.data;
+    if (data.length > 0) {
+
+      for (var i = 0, l = data.length; i < l; ++i) {
+        if (data[i].data.actions) {
+          data[i].data.actions.forEach(function(action) {
+            var cts = data[i].cts;
+            self.queryEndDate = cts + 10; // offset: 10ms
+
+            callback(null, action);
+          });
+        }
+      }
+    } else {
+      callback(null, null);
+    }
+  }
+}
 
 
 module.exports = CloudDevice;

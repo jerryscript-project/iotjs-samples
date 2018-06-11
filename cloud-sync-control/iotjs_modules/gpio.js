@@ -83,6 +83,11 @@ native.prototype = {
 
   readSync: function() {
     this.value = fs.readFileSync(this.filePath);
+    var value = +this.value; // coert to number
+    if (value !== this.value) {
+      this.value = value;
+    }
+
     return this.value;
   },
 

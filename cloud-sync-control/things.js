@@ -22,7 +22,7 @@ var log = require('log');
 var sensors = new Sensors(config);
 var device = new CloudDevice(config.auth);
 
-var queryEndDate = lastSyncDate = Date.now();
+var lastSyncDate = Date.now();
 var syncInterval = config.sync.interval || 2000;
 
 function syncData(error, results) {
@@ -55,51 +55,6 @@ function syncData(error, results) {
   }
 }
 
-function syncActions(error, result) {
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  var data = result.data;
-
-  if (data.length > 0) {
-    var action = null;
-
-    for (var i = 0, l = data.length; i < l; ++i) {
-      if (data[i].data.actions) {
-        data[i].data.actions.forEach(function(action) {
-          var cts = data[i].cts;
-          var ts = data[i].ts;
-
-          log(action);
-
-          switch (action.name) {
-            case 'setOff':
-              break;
-            case 'setOn':
-              break;
-            case 'setMode':
-              var value = +action.parameters.mode;
-              if (Number.isInteger(value)) {
-                syncInterval = Math.max(2000, value);
-                syncInterval = Math.min(10000, syncInterval);
-                log('interval is changed:', syncInterval);
-              }
-              break;
-            default:
-              break;
-          }
-
-          queryEndDate = cts + 10; // offset: 10ms
-        });
-      }
-    }
-  }
-  requestLastAction(2000);
-}
-
-
 function requestSyncSensors() {
   setTimeout(function() {
     sensors.fetch(syncData);
@@ -108,17 +63,23 @@ function requestSyncSensors() {
 
 
 function requestLastAction(interval) {
-  setTimeout(function() {
-    // polling actions
-    var query = {
-      startDate: queryEndDate,
-      endDate: Date.now(),
-      order: 'desc',
-      count: 1,
-    };
+ setTimeout(function() {
+  device.getLastAction(function(error, action) {
+    if (action) {
+      log(action);
 
-    device.getActions(query, syncActions);
-  }, interval || 2000);
+      switch (action.name) {
+        case 'setOff':
+        case 'setOn':
+        case 'setMode':
+        default:
+          break;
+      }
+    }
+
+    requestLastAction();
+  });
+ }, interval || 2000);
 }
 
 requestSyncSensors();
