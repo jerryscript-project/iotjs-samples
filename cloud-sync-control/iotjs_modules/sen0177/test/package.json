@@ -1,0 +1,13 @@
+{
+  "name": "sen0177",
+  "version": "1.0.0",
+  "iotjs": {
+    "version": ">=1.0"
+  },
+  "description": "Sen0177 Module",
+  "homepage": "https://github.com/hs0225/my_modules/tree/sen0177",
+  "dependencies": {
+    "uart": ">=1.0"
+  },
+  "license": "Apache 2.0"
+}
