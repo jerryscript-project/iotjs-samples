@@ -49,7 +49,7 @@ function syncData(error, results) {
     // post data
     log('sync...');
     device.postMessage(data, function(error) {
-      error ? console.error(error) : log('done');
+      error ? log(error) : log('done');
       requestSyncSensors();
     });
   }
@@ -69,8 +69,12 @@ function requestLastAction(interval) {
       log(action);
 
       switch (action.name) {
-        case 'setOff':
         case 'setOn':
+          sensors.setAirQuality(30);
+          break;
+        case 'setOff':
+          sensors.setAirQuality(0);
+          break;
         case 'setMode':
         default:
           break;
@@ -83,6 +87,6 @@ function requestLastAction(interval) {
 }
 
 requestSyncSensors();
-// requestLastAction();
+requestLastAction();
 
 log('sensors on #' + config.id + ' start monitoring');

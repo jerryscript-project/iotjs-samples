@@ -99,26 +99,14 @@
     {
       "name": "setOn",
       "description": "Set state to On",
-      "parameters": [
-        {
-          "name": "id",
-          "type": "ID",
-          "valueClass": "String"
-        }
-      ],
+      "parameters": [],
       "isStandard": false,
       "type": "CUSTOM"
     },
     {
       "name": "setOff",
       "description": "Set state to Off",
-      "parameters": [
-        {
-          "name": "id",
-          "type": "ID",
-          "valueClass": "String"
-        }
-      ],
+      "parameters": [],
       "isStandard": false,
       "type": "CUSTOM"
     },

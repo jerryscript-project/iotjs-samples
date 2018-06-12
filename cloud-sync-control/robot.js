@@ -20,6 +20,8 @@ var log = require('log');
 var config = require('./config').get();
 var device = new CloudDevice(config.auth);
 
+var cur_target = '0';
+
 var queue = [];
 
 function show_queue_state() {
@@ -54,8 +56,14 @@ robot.on('temp', function() {
 
 robot.on('idle', request_idle_action);
 
-robot.go('idle');
+reset();
 
+function reset() {
+  cur_target = '0';
+  queue.length = 0;
+  robot.go('idle');
+  show_queue_state();
+}
 
 function request_idle_action(interval) {
   setTimeout(function() {
@@ -69,7 +77,9 @@ function request_idle_action(interval) {
       show_queue_state();
 
       var dest = task[0];
-      var bad = task[1]
+      var bad = task[1];
+
+      cur_target = dest;
 
       robot.go('move', dest, robot.pending_next('temp'));
 
@@ -82,16 +92,44 @@ function request_idle_action(interval) {
 
 // listening actions
 
+function handle_task_queue(task_raw, cmd, bad) {
+  switch (cmd.toUpperCase()) {
+    case 'R':
+      reset();
+    break;
+    case '1':
+    case '2':
+    case '3':
+      if (queue.indexOf(task_raw) < 0) {
+        // check if currnet robot pos is same with new task
+        if (cur_target == cmd) {
+          queue.unshift(task_raw);
+        } else {
+          queue.push(task_raw);
+        }
+        show_queue_state();
+      }
+      break;
+    default:
+      break;
+  }
+}
+
 function request_last_action(interval) {
   setTimeout(function() {
    device.getLastAction(function(error, action) {
      if (action) {
        log(action);
 
+       var task_raw = action.parameters.mode;
+       var task = task_raw.split(':');
+       var cmd = task[0];
+       var bad = task[1];
+
        switch (action.name) {
-         case 'setOff':
-         case 'setOn':
          case 'setMode':
+          handle_task_queue(task_raw, cmd, bad);
+          break;
          default:
            break;
        }
