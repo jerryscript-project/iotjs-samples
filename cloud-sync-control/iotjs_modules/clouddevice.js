@@ -67,6 +67,48 @@ CloudDevice.prototype.postMessage = function(data, callback) {
   createResultHandler(callback));
 };
 
+CloudDevice.prototype.getLastMessage = function(callback) {
+  var query = {
+    sdids: this.deviceID,
+  };
+
+  request({
+    hostname: this.hostname,
+    method: 'GET',
+    path: '/v1.1/messages/last?' + querystring.encode(query),
+    rejectUnauthorized: false,
+    headers: {
+      'Authorization': 'Bearer ' + this.deviceToken,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'User-Agent': this.userAgent,
+    },
+  },
+  null,
+  createResultHandler(callback));
+}
+
+CloudDevice.prototype.getSnapshots = function(callback) {
+  var query = {
+    sdids: this.deviceID,
+  };
+
+  request({
+    hostname: this.hostname,
+    method: 'GET',
+    path: '/v1.1/messages/snapshots?' + querystring.encode(query),
+    rejectUnauthorized: false,
+    headers: {
+      'Authorization': 'Bearer ' + this.deviceToken,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'User-Agent': this.userAgent,
+    },
+  },
+  null,
+  createResultHandler(callback));
+}
+
 
 CloudDevice.prototype.getActions = function(options, callback) {
 
@@ -107,7 +149,7 @@ CloudDevice.prototype.getLastAction = function(callback) {
     var action = null;
 
     if (error) {
-      console.error(error);
+      console.log(error);
       return;
     }
 

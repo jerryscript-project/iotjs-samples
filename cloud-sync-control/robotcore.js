@@ -25,7 +25,7 @@ inherits(Robot, FSM);
 
 Robot.prototype.execute = function(cmd, callback, timeout) {
   log('robot:' + cmd);
-  setTimeout(callback, timeout || 3000);
+  setTimeout(callback, timeout || 5000);
 }
 
 module.exports = Robot;

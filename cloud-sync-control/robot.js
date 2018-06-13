@@ -15,55 +15,108 @@
 
 var CloudDevice = require('clouddevice');
 var Robot = require('robotcore');
+var snapshot = require('cloudsnapshot');
+var mixin = require('util').mixin;
 var log = require('log');
-
 var config = require('./config').get();
+
+// create cloud device
 var device = new CloudDevice(config.auth);
+device = mixin(device, snapshot);
 
-var cur_target = '0';
-
+// task queue
 var queue = [];
 
-function show_queue_state() {
-  log(queue.length + ' left:', queue);
-}
+// debug
+var is_debug_with_mock_action = false;
 
+// deme sites
+var cur_target = '0';
+
+var rule = {
+  humidity: 55,
+  airQuality: 8,
+};
+
+// state defination
 var robot = new Robot({
   init: 'start',
   states: {
     start: ['idle'],
     idle: ['move', 'end'],
-    move: ['temp', 'humidity'],
-    temp: ['idle'],
-    humidity: ['idle'],
+    move: ['temp', 'humidity', 'air'],
+    temp: ['idle', 'humidity', 'temp'],
+    humidity: ['idle', 'humidity', 'temp'],
+    air: ['idle'],
     end: [],
   }
 });
 
+// move state
 robot.on('move', function(dest, callback) {
   this.execute('move '+ dest, callback);
 
-}).on('move:exit', function() {
-  log('move:exit');
+}).on('move:exit', function(dest, bad) {
+  log('move:exit', dest + ':' + bad);
+
+  switch (bad) {
+    case 'H':
+      robot.go('humidity');
+    break;
+    case 'T':
+      robot.go('temp');
+    break;
+    case 'A':
+      robot.go('air');
+    break;
+    default:
+    break;
+  }
 });
 
-robot.on('temp', function() {
-  this.execute('temp down', robot.pending_next(), 5000);
+// humidity state
+robot.on('humidity', function() {
+  var handler = function() {
+    // check if humidity is ok
+    device.humidity(cur_target, function(err, value) {
+      log('check humidity'+cur_target, value);
 
-}).on('temp:exit', function() {
-  log('temp:exit');
+      if (value < rule.humidity) {
+        robot.go('idle');
+      } else {
+        robot.execute('humidity down', handler);
+      }
+    });
+  };
+
+  robot.execute('humidity down', handler);
+
+}).on('humidity:exit', function() {
+  log('humidity:exit');
+});
+
+
+// air state
+robot.on('air', function() {
+  var handler = function() {
+    // check if air is ok
+    device.airQuality(cur_target, function(err, value) {
+      log('check air quality'+cur_target, value);
+
+      if (value < rule.airQuality) {
+        robot.go('idle');
+      } else {
+        robot.execute('air quality down', handler);
+      }
+    });
+  };
+  robot.execute('air quality down', handler);
+
+}).on('air:exit', function() {
+  log('air:exit');
 });
 
 robot.on('idle', request_idle_action);
-
-reset();
-
-function reset() {
-  cur_target = '0';
-  queue.length = 0;
-  robot.go('idle');
-  show_queue_state();
-}
 
 function request_idle_action(interval) {
   setTimeout(function() {
@@ -81,8 +134,9 @@ function request_idle_action(interval) {
 
       cur_target = dest;
 
-      robot.go('move', dest, robot.pending_next('temp'));
-
+      robot.go('move', dest, function() {
+        robot.end(dest, bad);
+      });
     } else {
       request_idle_action();
     }
@@ -90,7 +144,30 @@ function request_idle_action(interval) {
   }, interval || 1000);
 }
 
-// listening actions
+// start robot
+reset();
+
+
+// start request last action
+if (is_debug_with_mock_action == false) {
+  request_last_action();
+
+} else {
+  var Mock = require('mock');
+  var mockio = new Mock('action');
+  request_last_action_mock();
+}
+
+// app reset
+
+function reset() {
+  cur_target = '0';
+  queue.length = 0;
+  robot.go('idle');
+  show_queue_state();
+}
+
+// task queue handler
 
 function handle_task_queue(task_raw, cmd, bad) {
   switch (cmd.toUpperCase()) {
@@ -115,6 +192,12 @@ function handle_task_queue(task_raw, cmd, bad) {
   }
 }
 
+function show_queue_state() {
+  log(queue.length + ' left:', queue);
+}
+
+// listening actions
+
 function request_last_action(interval) {
   setTimeout(function() {
    device.getLastAction(function(error, action) {
@@ -138,26 +221,20 @@ function request_last_action(interval) {
      request_last_action();
    });
   }, interval || 2000);
- }
-
-var Mock = require('mock');
-var mockio = new Mock('action');
+}
 
 function request_last_action_mock(interval) {
   setTimeout(function() {
-    var data = mockio.read();
-    if (data != '0') {
-      var task = data + ':Temp';
-      if (queue.indexOf(task) < 0) {
-        queue.push(task);
-        show_queue_state();
-      }
+    var task_raw = mockio.read();
+    if (task_raw != '0') {
+      var task = task_raw.split(':');
+      var cmd = task[0];
+      var bad = task[1];
+
+      handle_task_queue(task_raw, cmd, bad);
 
       mockio.write(0);
     }
     request_last_action_mock();
   }, interval || 2000);
 }
-
-request_last_action();
-// request_last_action_mock();

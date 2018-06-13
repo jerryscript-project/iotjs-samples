@@ -21,7 +21,7 @@ function Sensors(config) {
   this.id = config.id;
   this.fakeAirQuality = 0;
 
-  // this.enableExtraSensors(config);
+  this.enableExtraSensors(config);
 }
 
 
@@ -39,9 +39,6 @@ Sensors.prototype.fetch = function(callback) {
   if (this.sht10) {
     t = this.sht10.readTemperatureC();
     h = this.sht10.readHumidity();
-    // unblock for read mock io
-    // h = this.dataPin.readSync();
-    // t = this.clockPin.readSync();
   }
 
   if (this.fakeAirQuality != 0) {

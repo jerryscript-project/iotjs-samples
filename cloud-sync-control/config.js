@@ -23,6 +23,7 @@ if (process.argv.length > 2) {
 
 switch(process.platform) {
   case 'linux':
+  case 'tizen':
     pin.shtDataPin = 5;
     pin.shtClockPin = 6;
   break;
@@ -32,12 +33,13 @@ switch(process.platform) {
     pin.shtClockPin = 32;
   break;
 
-  case 'tizen':
   case 'nuttx':
   default:
     throw new Error('Unsupported platform');
   break;
 }
+
+console.log('device #' + default_id);
 
 module.exports = {
   get: function(id) {

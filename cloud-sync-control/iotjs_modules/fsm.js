@@ -21,9 +21,18 @@ function StateMachine(config) {
 
   this.states = mixin(config.states);
   this.current = config.init;
+  this.state = config.init;
 }
 
 StateMachine.prototype = {
+  emitonce: function(state) {
+    if (this.state != state) {
+      var args = Array.prototype.slice.call(arguments, 1);
+
+      this.state = state;
+      this.emit.apply(this, [this.state].concat(args));
+    }
+  },
   go: function(next) {
     var prev = this.current;
     var available_states = this.states[prev];
@@ -33,19 +42,22 @@ StateMachine.prototype = {
     }
 
     if (available_states.indexOf(next) >= 0) {
-      this.emit(prev + ':exit');
-      this.emit(next + ':enter');
+      this.emitonce(prev + ':exit');
+      this.emitonce(next + ':enter');
 
       this.current = next;
 
-      var args = Array.prototype.slice.call(arguments, 1);
-      this.emit.apply(this, [this.current].concat(args));
-
+      this.emitonce.apply(this, Array.prototype.slice.call(arguments));
     } else {
-      this.emit('ignored');
+      // this.emit('ignored');
+      console.warn(next +' state change is ignored');
     }
 
     return this;
+  },
+  end: function() {
+    var args = Array.prototype.slice.call(arguments);
+    this.emitonce.apply(this, [this.current + ':exit'].concat(args));
   },
   state: function() {
     return this.current;
