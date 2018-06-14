@@ -1,0 +1,151 @@
+<!-- Copyright 2018-present Samsung Electronics Co., Ltd. and other contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+  <title></title>
+  <style>
+    html,body{
+      /* height:100%; */
+    }
+    body{
+      text-align:center;
+    }
+    body:before{
+      content:'';
+      height:100%;
+      display:inline-block;
+      vertical-align:middle;
+    }
+    button{
+      background:#1AAB8A;
+      color:#fff;
+      border:none;
+      position:relative;
+      height:60px;
+      font-size:1.6em;
+      padding:0 2em;
+      cursor:pointer;
+      transition:800ms ease all;
+      outline:none;
+      margin: 1em;
+    }
+    button:hover{
+      background:#fff;
+      color:#1AAB8A;
+    }
+    button:before,button:after{
+      content:'';
+      position:absolute;
+      top:0;
+      right:0;
+      height:2px;
+      width:0;
+      background: #1AAB8A;
+      transition:400ms ease all;
+    }
+    button:after{
+      right:inherit;
+      top:inherit;
+      left:0;
+      bottom:0;
+    }
+    button:hover:before,button:hover:after{
+      width:100%;
+      transition:800ms ease all;
+    }
+    select { 
+      width: 200px; 
+      padding: .8em .5em; 
+      font-size:1.2em;
+      font-family: inherit;
+      border: 1px solid #999; 
+      border-radius: 0px; 
+      -webkit-appearance: none;
+      -moz-appearance: none; 
+      appearance: none; 
+    }
+  </style>
+</head>
+<body>
+  <div id = "button_controler">
+    <button type="button" id="forwardButton" onclick="forward_click()">Forward</button>
+    <button type="button" id="backwardButton" onclick="backward_click()">Backward</button>
+    <button type="button" id="stopButton" onclick="stop_click()">Stop</button>
+  </div>
+  <div id = "speed_controler">
+    <button type="button" id="speedUp" onclick="speed_up_click()">Speed Up</button>
+    <button type="button" id="speedDown" onclick="speed_down_click()">Speed Down</button>
+    <button id= "speed_box">2000</button>
+  </div>
+  <div id = "togo_controler">
+      <select name="end" id="end">
+          <option value="home">Home</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+      </select>
+      <button type="button" id="goButton" onclick="go_click()">Go</button>
+  </div>
+  <script type="text/javascript">
+    var speedBox = document.getElementById('speed_box');
+    var xhr = new XMLHttpRequest();
+    
+    xhr.onreadystatechange = function() {
+      // console.log(xhr.readyState, xhr.response, xhr.responseText);
+      if (xhr.readyState === 4) {
+        speedBox.innerText = xhr.response;
+      }
+  }
+
+    function sendMessage(msg) {
+      xhr.open('POST', '/' + msg, true);
+      xhr.send();
+    }
+
+    function forward_click() {
+      sendMessage('forward');
+    }
+
+    function backward_click() {
+      sendMessage('backward');
+    }
+
+    function stop_click() {
+      sendMessage('stop');
+    }
+
+    function speed_up_click() {
+      sendMessage('sup');
+    }
+
+    function speed_down_click() {
+      sendMessage('sdown');
+    }
+
+    function go_click() {
+      var e = document.getElementById('end');
+
+      var eValue = e.options[e.selectedIndex].value;
+      if (eValue === 'home') {
+        eValue = 'H';
+      }
+      sendMessage('go/' + eValue);
+    }
+
+  </script>
+</body>
+</html>
