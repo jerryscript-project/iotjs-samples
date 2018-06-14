@@ -17,6 +17,21 @@ var gpio = require('gpio') ? require('gpio') : require('./gpio');
 var Sht1x = require('sht1x');
 var log = require('log');
 
+var limit = {
+  t: {
+    max:50,
+    min:0,
+  },
+  h: {
+    max:100,
+    min:0,
+  },
+  a: {
+    max:50,
+    min:0,
+  },
+}
+
 function Sensors(config) {
   this.id = config.id;
   this.fakeAirQuality = 0;
@@ -39,6 +54,8 @@ Sensors.prototype.fetch = function(callback) {
   if (this.sht10) {
     t = this.sht10.readTemperatureC();
     h = this.sht10.readHumidity();
+    t = Math.round(t*100)/100;
+    h = Math.round(h*100)/100;
   }
 
   if (this.fakeAirQuality != 0) {
@@ -60,7 +77,7 @@ Sensors.prototype.fetch = function(callback) {
     str += 'aq:' + aq + ' ';
   }
 
-  if (t !== undefined) {
+  if(t && t > limit.t.min && t < limit.t.max) {
     results.push({
       name: 'temperature' + id,
       value: t,
@@ -68,7 +85,7 @@ Sensors.prototype.fetch = function(callback) {
     str += 't:' + t + ' ';
   }
 
-  if (h !== undefined) {
+  if (h && h > limit.h.min && h < limit.h.max) {
     results.push({
       name: 'humidity' + id,
       value: h,

@@ -26,7 +26,16 @@
  * https://github.com/practicalarduino/SHT1x
  */
 
-var sleep = require('sleep');
+var sleep;
+try {
+  sleep = require('sleep');
+} catch(e) {
+  // temporary fix for x86 mock test
+  sleep = {
+    usleepSync: function() { return 0; }
+  };
+}
+
 var gpio = require('gpio');
 var pin_shift = require('pin_shift');
 

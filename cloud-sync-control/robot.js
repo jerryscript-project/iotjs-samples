@@ -27,11 +27,9 @@ device = mixin(device, snapshot);
 // task queue
 var queue = [];
 
-// debug
-var is_debug_with_mock_action = false;
-
 // deme sites
-var cur_target = '0';
+var cur_dest = '0';
+var cur_bad = '0';
 
 var rule = {
   humidity: 55,
@@ -78,8 +76,8 @@ robot.on('move', function(dest, callback) {
 robot.on('humidity', function() {
   var handler = function() {
     // check if humidity is ok
-    device.humidity(cur_target, function(err, value) {
-      log('check humidity'+cur_target, value);
+    device.humidity(cur_dest, function(err, value, res) {
+      log('check humidity'+cur_dest, value, res.headers['X-Rate-Limit-Remaining']);
 
       if (value < rule.humidity) {
         robot.go('idle');
@@ -93,6 +91,7 @@ robot.on('humidity', function() {
 
 }).on('humidity:exit', function() {
   log('humidity:exit');
+  cur_bad = 0;
 });
 
 
@@ -100,8 +99,8 @@ robot.on('humidity', function() {
 robot.on('air', function() {
   var handler = function() {
     // check if air is ok
-    device.airQuality(cur_target, function(err, value) {
-      log('check air quality'+cur_target, value);
+    device.airQuality(cur_dest, function(err, value, res) {
+      log('check air quality'+cur_dest, value, res.headers['X-Rate-Limit-Remaining']);
 
       if (value < rule.airQuality) {
         robot.go('idle');
@@ -114,6 +113,7 @@ robot.on('air', function() {
 
 }).on('air:exit', function() {
   log('air:exit');
+  cur_bad = 0;
 });
 
 robot.on('idle', request_idle_action);
@@ -132,7 +132,8 @@ function request_idle_action(interval) {
       var dest = task[0];
       var bad = task[1];
 
-      cur_target = dest;
+      cur_dest = dest;
+      cur_bad = bad;
 
       robot.go('move', dest, function() {
         robot.end(dest, bad);
@@ -147,21 +148,36 @@ function request_idle_action(interval) {
 // start robot
 reset();
 
+// start listening action
+subscribeAction();
 
-// start request last action
-if (is_debug_with_mock_action == false) {
-  request_last_action();
 
-} else {
-  var Mock = require('mock');
-  var mockio = new Mock('action');
-  request_last_action_mock();
-}
+function subscribeAction() {
+  device.subscribeAction(function(action) {
+    if (action) {
+      log(action);
+
+      switch (action.name) {
+        case 'setMode':
+          var task_raw = action.parameters.mode;
+          var task = task_raw.split(':');
+          var cmd = task[0];
+          var bad = task[1];
+
+          handle_task_queue(task_raw, cmd, bad);
+          break;
+        default:
+          break;
+      }
+    }
+  });
+};
 
 // app reset
 
 function reset() {
-  cur_target = '0';
+  cur_dest = '0';
+  cur_bad = '0';
   queue.length = 0;
   robot.go('idle');
   show_queue_state();
@@ -178,13 +194,19 @@ function handle_task_queue(task_raw, cmd, bad) {
     case '2':
     case '3':
       if (queue.indexOf(task_raw) < 0) {
-        // check if currnet robot pos is same with new task
-        if (cur_target == cmd) {
-          queue.unshift(task_raw);
+        if ((cur_dest == cmd) && (cur_bad == bad)) {
+          log('action skipped', cur_dest, cur_bad);
         } else {
-          queue.push(task_raw);
+          // check if currnet robot pos is same with new task
+          if (cur_dest == cmd) {
+            queue.unshift(task_raw);
+          } else {
+            queue.push(task_raw);
+          }
+          show_queue_state();
         }
-        show_queue_state();
+      } else {
+        log('action skipped');
       }
       break;
     default:
@@ -202,19 +224,19 @@ function request_last_action(interval) {
   setTimeout(function() {
    device.getLastAction(function(error, action) {
      if (action) {
-       log(action);
+      log(action.name);
 
-       var task_raw = action.parameters.mode;
-       var task = task_raw.split(':');
-       var cmd = task[0];
-       var bad = task[1];
+      switch (action.name) {
+        case 'setMode':
+          var task_raw = action.parameters.mode;
+          var task = task_raw.split(':');
+          var cmd = task[0];
+          var bad = task[1];
 
-       switch (action.name) {
-         case 'setMode':
           handle_task_queue(task_raw, cmd, bad);
           break;
-         default:
-           break;
+        default:
+          break;
        }
      }
 
@@ -224,6 +246,8 @@ function request_last_action(interval) {
 }
 
 function request_last_action_mock(interval) {
+  var Mock = require('mock');
+  var mockio = new Mock('action');
   setTimeout(function() {
     var task_raw = mockio.read();
     if (task_raw != '0') {

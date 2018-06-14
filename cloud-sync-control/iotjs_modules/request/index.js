@@ -29,7 +29,7 @@ function request(options, data, callback) {
     });
 
     res.on('end', function() {
-      callback(null, responseData);
+      callback(null, responseData, res);
     });
 
     res.on('error', function(err) {

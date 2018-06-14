@@ -48,8 +48,8 @@ function syncData(error, results) {
 
     // post data
     log('sync...');
-    device.postMessage(data, function(error) {
-      error ? log(error) : log('done');
+    device.postMessage(data, function(error, data, res) {
+      error ? log(error) : log('done ' + res.headers['X-Rate-Limit-Remaining']);
       requestSyncSensors();
     });
   }
@@ -61,18 +61,16 @@ function requestSyncSensors() {
   }, syncInterval);
 }
 
-
-function requestLastAction(interval) {
- setTimeout(function() {
-  device.getLastAction(function(error, action) {
+function subscribeAction() {
+  device.subscribeAction(function(action) {
     if (action) {
-      log(action);
-
       switch (action.name) {
         case 'setOn':
+          log(action.name);
           sensors.setAirQuality(30);
           break;
         case 'setOff':
+          log(action.name);
           sensors.setAirQuality(0);
           break;
         case 'setMode':
@@ -80,13 +78,37 @@ function requestLastAction(interval) {
           break;
       }
     }
-
-    requestLastAction();
   });
- }, interval || 2000);
-}
+};
 
 requestSyncSensors();
-requestLastAction();
+subscribeAction();
 
 log('sensors on #' + config.id + ' start monitoring');
+
+
+
+// backup
+function requestLastAction(interval) {
+  setTimeout(function() {
+   device.getLastAction(function(error, action) {
+     if (action) {
+       switch (action.name) {
+         case 'setOn':
+           log(action.name);
+           sensors.setAirQuality(30);
+           break;
+         case 'setOff':
+           log(action.name);
+           sensors.setAirQuality(0);
+           break;
+         case 'setMode':
+         default:
+           break;
+       }
+     }
+
+     requestLastAction();
+   });
+  }, interval || 2000);
+ }
