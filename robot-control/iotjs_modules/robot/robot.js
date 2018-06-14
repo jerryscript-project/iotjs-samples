@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-var Moter = require('moter');
+var Moter = require('./moter');
 // var TRSensor = require('trsensor');
 var http = require('http');
 var fs = require('fs');
@@ -46,7 +46,7 @@ function fetchFile(path) {
   return data;
 }
 
-  
+
 var HOME = 0, A = 1, B = 2;
 var RUNNING = 0, STOP = 1;
 var FORWARD = 0, BACKWARD = 1;

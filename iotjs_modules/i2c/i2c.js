@@ -13,19 +13,15 @@
  * limitations under the License.
  */
 
-var FSM = require('fsm');
-var inherits = require('util').inherits;
-var log = require('log');
-
-function Robot(config) {
-  FSM.call(this, config);
+function I2C() {
 }
 
-inherits(Robot, FSM);
+I2C.prototype.writeSync = function() {};
+I2C.prototype.readSync = function() {
+  return [0];
+};
 
-Robot.prototype.execute = function(cmd, callback, timeout) {
-  log('robot:' + cmd);
-  setTimeout(callback, timeout || 5000);
+module.exports = {
+  open: function() { return new I2C() },
+  openSync: function() { return new I2C() },
 }
-
-module.exports = Robot;

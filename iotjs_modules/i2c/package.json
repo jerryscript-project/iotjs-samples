@@ -1,0 +1,10 @@
+{
+  "name": "i2c",
+  "version": "1.0.0",
+  "iotjs": {
+    "version": ">=1.0"
+  },
+  "description": "i2c mock api for iotjs",
+  "main": "i2c.js",
+  "license": "Apache 2.0"
+}

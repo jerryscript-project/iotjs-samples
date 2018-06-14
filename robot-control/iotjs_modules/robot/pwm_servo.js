@@ -14,7 +14,15 @@
  */
 
 var i2c = require('i2c');
-var sleep = require('sleep');
+var sleep;
+try {
+  sleep = require('sleep');
+} catch(e) {
+  // temporary fix for x86 mock test
+  sleep = {
+    usleepSync: function() { return 0; }
+  };
+}
 
 var PCA9685_SUBADR1 = 0x2;
 var PCA9685_SUBADR2 = 0x3;
@@ -60,20 +68,20 @@ PWMServo.prototype.setPWMFreq = function(freq) {
 
   // var prescale = Buffer(1);
   // prescale.writeUInt8(Math.floor(prescaleval + 0.5));
-  
+
   // var oldmode = Buffer(1);
   // oldmode.writeUInt8(this.read8(PCA9685_MODE1))
-  
+
   // var newmode = Buffer(1);
   // newmode.writeUInt8((oldmode.readUInt8(0) & 0x7F) | 0x10); // sleep
-  
+
   // this.i2c.writeSync([PCA9685_MODE1, newmode.readUInt8(0)]); // go to sleep
   // this.i2c.writeSync([PCA9685_PRESCALE, prescale.readUInt8(0)]); // set the prescaler
   // this.i2c.writeSync([PCA9685_MODE1, oldmode.readUInt8(0)]);
   // sleep.usleepSync(5000);
   // this.i2c.writeSync([PCA9685_MODE1, oldmode.readUInt8(0) | 0xa0]);  //  This sets the MODE1 register to turn on auto increment.
 
-  
+
   var prescale = Math.floor(prescaleval + 0.5);
   var oldmode = this.read8(PCA9685_MODE1)[0];
   var newmode = (oldmode & 0x7F) | 0x10;
@@ -81,7 +89,7 @@ PWMServo.prototype.setPWMFreq = function(freq) {
   this.i2c.writeSync([PCA9685_PRESCALE, prescale]); // set the prescaler
   this.i2c.writeSync([PCA9685_MODE1, oldmode]);
   sleep.usleepSync(5000);
-  this.i2c.writeSync([PCA9685_MODE1, oldmode | 0xa0]); 
+  this.i2c.writeSync([PCA9685_MODE1, oldmode | 0xa0]);
 }
 
 PWMServo.prototype.setPWM = function(num, on, off) {
@@ -93,7 +101,7 @@ PWMServo.prototype.setPWM = function(num, on, off) {
 
   // var offBuffer = Buffer([_off]);
   // var off = offBuffer.readUInt8(0);
-  
+
   on = (on < 0) ? 0 : on;
   on = (on > 4096) ? 4096 : on;
 

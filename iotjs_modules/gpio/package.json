@@ -1,0 +1,10 @@
+{
+  "name": "gpio",
+  "version": "1.0.0",
+  "iotjs": {
+    "version": ">=1.0"
+  },
+  "description": "gpio mock api for iotjs",
+  "main": "gpio.js",
+  "license": "Apache 2.0"
+}

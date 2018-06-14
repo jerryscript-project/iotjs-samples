@@ -1,0 +1,10 @@
+{
+  "name": "robot",
+  "version": "1.0.0",
+  "iotjs": {
+    "version": ">=1.0"
+  },
+  "description": "robot demo",
+  "main": "robot.js",
+  "license": "Apache 2.0"
+}

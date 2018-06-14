@@ -13,11 +13,16 @@
  * limitations under the License.
  */
 
+var auth = require('./auth');
+
 module.exports = {
-  moter: {
-    ain1: 20,
-    ain2: 21,
-    bin1: 24,
-    bin2: 23,
+  auth: auth,
+  pin: {
+    moter: {
+      ain1: 20,
+      ain2: 21,
+      bin1: 24,
+      bin2: 23,
+    }
   },
-}
+};

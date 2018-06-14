@@ -14,7 +14,7 @@
  */
 
 var gpio = require('gpio');
-var PWMServo = require('pwm_servo');
+var PWMServo = require('./pwm_servo');
 
 var HIGH = true, LOW = false;
 var defaultSpeed = 2000;

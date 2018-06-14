@@ -1,0 +1,10 @@
+{
+  "name": "fsm",
+  "version": "1.0.0",
+  "iotjs": {
+    "version": ">=1.0"
+  },
+  "description": "state machine",
+  "main": "fsm.js",
+  "license": "Apache 2.0"
+}
