@@ -30,12 +30,7 @@ function getMsg() {
   var temperature = Math.round(Math.random() * 100);
 
   return JSON.stringify({
-    "sdid": device_id,
-    "ts": Date.now(),
-    "type": "message",
-    "data": {
-      "temp": temperature
-    }
+    "temp": temperature,
   });
 }
 

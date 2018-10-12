@@ -15,15 +15,13 @@ Click on the device, and a popup will show up. You should generate a device toke
 Copy your `device ID` and `device token` to the corresponding values in the JS example file, generate a client certificate and a private key for example with `OpenSSL`, and also set it in the JS file.
 ## Additional information
 According to the documentation the data you send must be `JSON.stringify`-d, and should be in the following format:
+
 ```js
 var data = {
-    "data": {
-        "property_name": property_value,
-        ...
-    }
-}
+  "property_name": property_value,
+   ...
+};
 ```
-**Note**: For some reason the Artik cloud currently only receives empty data object `{}`.
 
 Only one MQTT client can be connected with the same `device id` simultaneously.
 A client can `publish` and/or `subscribe` to a topic.
