@@ -8,7 +8,7 @@ See also:
 
 
 ## Description
-This sample show you how you can create a 'mixed' module using brige module that has some interfaces to support communicattion between JS and Native code. This sample created using tools/iotjs-create-module.py script.
+This sample show you how you can create a 'mixed' module using brige module that has some interfaces to support communication between JS and Native code. This sample created using tools/iotjs-create-module.py script.
 You can see how you could reduce your effor to create native module using simple methods provided bridge module.
 
 
