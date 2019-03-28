@@ -44,16 +44,15 @@ function download(url, output_filename) {
     rejectUnauthorized: false
   };
 
-  srv.get(options, function(response) {
-    var fd = fs.openSync(output_filename, "w");
+  var outputStream = fs.createWriteStream(output_filename);
 
-    response.on('data', function(chunk) {
-      fs.write(fd, chunk, 0, chunk.length, function(){});
-    });
+  srv.get(options, function(response) {
+    console.log(response.headers);
+    response.pipe(outputStream);
 
     response.on('end', function() {
-      fs.closeSync(fd);
       console.log(output_filename + ' is saved successfully.');
+      response.unpipe(outputStream);
     });
   }).on('error', function() {
     console.log(arguments);
@@ -61,4 +60,7 @@ function download(url, output_filename) {
   });
 }
 
-download('https://upload.wikimedia.org/wikipedia/commons/6/6a/Tizen_Logo.png', "logo.png")
+// Download an image from some url.
+download('https://upload.wikimedia.org/wikipedia/commons/6/6a/Tizen_Logo.png', 'logo.png');
+// Request the image from the local server (it has to be run first).
+download('http://localhost:8822/logo.png', 'foo.png');
